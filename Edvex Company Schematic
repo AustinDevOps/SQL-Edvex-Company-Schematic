@@ -1,0 +1,299 @@
+CREATE TABLE Employee
+(EmpID INT PRIMARY KEY,
+FirstName VARCHAR(30),
+LastName VARCHAR(30),
+BirthDay DATE,
+Sex VARCHAR(10),
+Salary INT,
+SupervisorID INT,
+BranchID INT
+)
+
+SELECT *
+FROM Employee
+
+SELECT *
+FROM Branch
+
+CREATE TABLE Branch
+(BranchID INT PRIMARY KEY,
+BranchName VARCHAR(30),
+MgrID INT,
+MgrStartDate DATE,
+FOREIGN KEY(MgrID) REFERENCES Employee(EmpID) ON DELETE SET NULL
+);
+
+ALTER TABLE Employee
+ADD FOREIGN KEY(BranchID)
+REFERENCES Branch(BranchID)
+ON DELETE SET NULL
+
+ALTER TABLE Employee
+ADD FOREIGN KEY(SupervisorID)
+REFERENCES Employee(EmpID)
+--ON DELETE SET NULL
+
+CREATE TABLE Client 
+(ClientID INT PRIMARY KEY,
+ClientName VARCHAR(50),
+BranchID INT,
+FOREIGN KEY(BranchID) REFERENCES Branch(BranchID) ON DELETE SET NULL
+)
+
+CREATE TABLE WorksWith
+(EmpID INT,
+ClientID INT,
+TotalSales INT,
+PRIMARY KEY(EmpID, ClientID),
+FOREIGN KEY(EmpID) REFERENCES Employee(EmpID) ON DELETE CASCADE,
+FOREIGN KEY(ClientID) REFERENCES Client(ClientID) ON DELETE CASCADE
+)
+
+CREATE TABLE BranchSupplier
+(BranchID INT,
+SupplierName VARCHAR(50),
+SupplyType VARCHAR(40),
+PRIMARY KEY(BranchID, SupplierName),
+FOREIGN KEY(BranchID) REFERENCES Branch(BranchID) ON DELETE CASCADE
+)
+
+--INSERTING INFORMATIONS INTO THE TABLES
+
+--Corporate Branch
+INSERT INTO Employee VALUES
+(100, 'David', 'Wallace', '1967-11-17', 'Male', 250000, NULL, NULL)
+
+INSERT INTO Branch VALUES
+(1, 'Corporate', 100, '2006-02-09')
+
+UPDATE Employee
+SET BranchID = 1
+WHERE EmpID = 100
+
+INSERT INTO Employee VALUES
+(101, 'Jan', 'Levinson', '1961-05-11', 'Female', 110000, 100, 1)
+
+--Scranton Branch
+INSERT INTO Employee VALUES
+(102, 'Michael', 'Scott' , '1964-03-15', 'Male', 75000, 100, NULL)
+
+INSERT INTO Branch VALUES
+(2, 'Scranton', 102, '1992-04-06')
+
+UPDATE Employee
+SET BranchID = 2
+WHERE EmpID = 102
+
+INSERT INTO Employee VALUES
+(103, 'Angela', 'Martin', '1971-06-25', 'Female', 63000, 102, 2),
+(104, 'Kelly', 'Kapoor', '1980-02-05', 'Female', 55000, 102, 2),
+(105, 'Stanley', 'Hudson', '1958-02-19', 'Male', 69000, 102, 2)
+
+--Stanford Branch
+INSERT INTO Employee VALUES
+(106, 'Josh', 'Porter', '1969-09-05', 'Male', 78000, 100, NULL)
+
+INSERT INTO Branch VALUES
+(3, 'Stanford', 106, '1998-02-13')
+
+UPDATE Employee
+SET BranchID = 3
+WHERE EmpID = 106
+
+INSERT INTO Employee VALUES
+(107, 'Andy', 'Bernard', '1973-07-22', 'Male', 66000, 106, 3),
+(108, 'Jim', 'Halpert', '1978-10-01', 'Male', 71000, 106, 3)
+
+--BRANCH SUPPLIER TABLE
+INSERT INTO BranchSupplier VALUES
+(2, 'Hammr Mill', 'Paper'),
+(2, 'Uni-ball', 'Writing Utensils'),
+(3, 'Patriot Paper', 'Paper'),
+(2, 'J.T. Forms & Labels', 'Custom Forms'),
+(3, 'Uni-ball', 'Writing Utensils'),
+(3, 'Hammr Mill', 'Paper'),
+(3, 'Stamford Labels', 'Custom Forms')
+
+--CLIENT TABLE
+INSERT INTO Client VALUES
+(400, 'Dunmore Highschool', 2),
+(401, 'Lackawana Country', 2),
+(402, 'FedEx', 3),
+(403, 'John Daly Law, LLC', 3),
+(404, 'Scranton Whitepages', 2),
+(405, 'Times Newspaper', 3),
+(406, 'FedEx', 2)
+
+--WORKS WITH TABLE
+INSERT INTO WorksWith VALUES
+(105, 400, 55000),
+(102, 401, 267000),
+(108, 402, 22500),
+(107, 403, 5000),
+(108, 403, 12000),
+(105, 404, 33000),
+(107, 405, 26000),
+(102, 406, 15000),
+(105, 406, 130000)
+
+
+SELECT *
+FROM Employee
+
+SELECT *
+FROM Branch
+
+SELECT *
+FROM BranchSupplier
+
+SELECT *
+FROM Client
+
+SELECT *
+FROM WorksWith
+
+--Select all Employee, according to their salary
+SELECT *
+FROM Employee
+ORDER BY Salary DESC
+
+--Find all Employee ordered by Sex then Name
+SELECT *
+FROM Employee
+ORDER BY Sex DESC, FirstName DESC
+
+--Find the first 5 Employee from the table
+SELECT TOP 5 *
+FROM Employee
+
+SELECT DISTINCT(Sex)
+FROM Employee
+
+SELECT DISTINCT BranchID
+FROM Employee
+
+--SQL FUNCTIONS
+
+--Find the number of Employees in the database
+SELECT COUNT(EmpID)
+FROM Employee
+
+SELECT COUNT(SupervisorID)
+FROM Employee
+
+
+--Find the number of female employees born after 1970
+SELECT COUNT(EmpID)
+FROM Employee
+WHERE Sex = 'Female' AND BirthDay > '1970-01-01'
+
+--Find the average salaries of the male employees
+SELECT AVG(Salary)
+FROM Employee
+WHERE Sex = 'Male'
+
+--Find how many males and how many females they are
+--notice the aggregation function of group by used below
+
+SELECT COUNT(Sex) SexCount, Sex
+FROM Employee
+GROUP BY Sex
+
+--Find the total sales of each salesman
+
+SELECT SUM(TotalSales) EmployeeSales, EmpID
+FROM WorksWith
+GROUP BY EmpID
+
+--Find out how much each client spent in each branch
+
+SELECT SUM(TotalSales) ClientSpent, ClientID
+FROM WorksWith
+GROUP BY ClientID
+
+--Wildcards and LIKE key word
+--find any client who are in LLC
+
+SELECT *
+FROM CLIENT
+WHERE ClientName LIKE '%LLC'
+
+--Find any employee born in October
+SELECT *
+FROM Employee
+WHERE BirthDay LIKE '____-10%'
+
+--Find any client who are school
+
+SELECT *
+FROM Client
+WHERE ClientName LIKE '%School%'
+
+
+--find all branches and their managers
+
+SELECT Emp.EmpID, Emp.FirstName, Emp.LastName, Bra.BranchName
+FROM Employee Emp
+JOIN Branch Bra
+	ON Emp.EmpID = Bra.MgrID
+
+SELECT *
+FROM Employee
+
+SELECT *
+FROM WorksWith
+
+
+
+
+--TOP SELLING EMPLOYEE. i.e, Employee with the highest sales.
+
+SELECT Emp.FirstName, SUM(Works.TotalSales) TopSellers
+FROM Employee Emp
+JOIN WorksWith Works
+	ON Emp.EmpID = Works.EmpID
+GROUP BY Emp.FirstName
+ORDER BY TopSellers DESC
+
+--TOP BUYING CLIENT. i.e, Client that made the highest purchases.
+
+SELECT Cli.ClientName, SUM(Works.TotalSales) TopBuyers
+FROM Client Cli
+JOIN WorksWith Works
+	ON Cli.ClientID = Works.ClientID
+GROUP BY Cli.ClientName
+ORDER BY TopBuyers DESC
+
+
+
+SELECT *
+FROM WorksWith
+
+
+SELECT *
+FROM Client
+
+--NESTED QUERRIES
+--find names of all employees who have 
+--sold over 30,000 to a single client
+
+SELECT Emp.FirstName, Emp.LastName
+FROM Employee Emp
+WHERE Emp.EmpID IN (
+	SELECT Works.EmpID
+	FROM WorksWith Works
+	WHERE Works.TotalSales > 30000
+)
+
+--Find all clients who are handled by the branch
+--that Michael Scott manages,
+--Assume you know Michael's ID
+
+SELECT ClientName Clients_Managed_By_Michael
+FROM Client
+WHERE BranchID = (
+	Select BranchID
+	FROM Branch
+	WHERE MgrID = 102
+)
+
